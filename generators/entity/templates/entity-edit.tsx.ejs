@@ -1,0 +1,62 @@
+import React, { useState } from 'react';
+import { PageContainer } from '@ant-design/pro-layout';
+import { message, Card } from 'antd';
+import { history } from 'umi';
+import { BetaSchemaForm, ProFormColumnsType } from '@ant-design/pro-form';
+import { defaultColumns, relationFormColumns } from '@/pages/<%= context.entityFileName %>/column';
+
+import { get<%= context.entityNameCapitalized %>, update<%= context.entityNameCapitalized %>, add<%= context.entityNameCapitalized %> } from '@/services/<%= context.entityFileName %>/api';
+
+export default (props): React.ReactNode => {
+  const isEdit = Boolean(props.match?.params?.id);
+  const columns: ProFormColumnsType<API.<%= context.entityNameCapitalized %>>[] = defaultColumns.concat(relationFormColumns);;
+  const [<%= context.entityInstance %>, set<%= context.entityNameCapitalized %>] = useState<API.<%= context.entityNameCapitalized %>>({} as API.<%= context.entityNameCapitalized %>);
+
+  const onFinish = async (values: API.<%= context.entityNameCapitalized %>) => {
+    const hide = message.loading('正在提交');
+    const params = {...values};
+    const manyRelations = [
+    <%_ context.relationships.filter(relation => relation.relationshipType.indexOf('many-to-many')>-1).forEach((relation) => { _%>
+     '<%= relation.relationshipNamePlural %>',
+    <%_ }) _%>
+    ]
+    Object.keys(params).forEach(key=>{
+      if(manyRelations.includes(key)){
+        params[key]=params[key].id.map(item => ({id:item}))
+      }
+    })
+    try {
+      if (isEdit) {
+        await update<%= context.entityNameCapitalized %>(values.id, { data: { ...<%= context.entityInstance %>, ...params } });
+      } else {
+        await add<%= context.entityNameCapitalized %>({ data: { ...params } });
+      }
+      hide();
+      message.success('提交成功');
+      history.push('/<%= context.entityFileName %>/');
+    } catch (error) {
+      hide();
+      message.error('提交失败请重试！');
+    }
+  };
+
+  return (
+    <PageContainer>
+      <Card>
+        <BetaSchemaForm<API.<%= context.entityNameCapitalized %>>
+          request={async () => {
+            if (props.match?.params?.id) {
+              const res = await get<%= context.entityNameCapitalized %>(props.match?.params?.id);
+              set<%= context.entityNameCapitalized %>(res.data);
+              return res.data;
+            }
+            return {} as API.<%= context.entityNameCapitalized %>;
+          }}
+          layoutType="Form"
+          onFinish={onFinish}
+          columns={columns}
+        />
+      </Card>
+    </PageContainer>
+  );
+};

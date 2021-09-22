@@ -1,0 +1,74 @@
+// @ts-ignore
+/* eslint-disable */
+import { request } from 'umi';
+
+
+export async function <%= context.entityInstance %>(name:string, key: string){
+  const param = {
+    page: 0,
+    size: 200,
+  }
+  param[key+'.contains']=name;
+  return list<%= context.entityNameCapitalized %>(param).then(({data})=>{
+    const returnArray = [];
+    data.forEach(item => {
+      returnArray.push({'label':item[key],'value': item.id,'key': item.id})
+    })
+    return returnArray
+  })
+}
+
+/** 获取列表 GET  */
+export async function list<%= context.entityNameCapitalized %>(
+  params: {
+    // query
+    /** 当前的页码 */
+    page?: number;
+    /** 页面的容量 */
+    size?: number;
+  },
+  options?: { [key: string]: any },
+) {
+  return request<API.<%= context.entityNameCapitalized %>List>('/api/<%= context.entityNamePluralizedAndSpinalCased %>', {
+    method: 'GET',
+    getResponse: true,
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
+/** 获取GET  */
+export async function get<%= context.entityNameCapitalized %>(id: number, options?: { [key: string]: any }) {
+  return request<API.<%= context.entityNameCapitalized %>>(`/api/<%= context.entityNamePluralizedAndSpinalCased %>/${id}`, {
+    method: 'GET',
+    getResponse: true,
+    ...(options || {}),
+  });
+}
+
+/** 修改PUT */
+export async function update<%= context.entityNameCapitalized %>(id: number, options?: { [key: string]: any }) {
+  return request(`/api/<%= context.entityNamePluralizedAndSpinalCased %>/${id}`, {
+    method: 'PUT',
+    ...(options || {}),
+  });
+}
+
+/** 新建POST */
+export async function add<%= context.entityNameCapitalized %>(options?: { [key: string]: any }) {
+  return request('/api/<%= context.entityNamePluralizedAndSpinalCased %>', {
+    method: 'POST',
+    ...(options || {}),
+  });
+}
+
+/** 删除DELETE  */
+export async function delete<%= context.entityNameCapitalized %>(id: number, options?: { [key: string]: any }) {
+  return request<API.<%= context.entityNameCapitalized %>>(`/api/<%= context.entityNamePluralizedAndSpinalCased %>/${id}`, {
+    method: 'DELETE',
+    getResponse: true,
+    ...(options || {}),
+  });
+}

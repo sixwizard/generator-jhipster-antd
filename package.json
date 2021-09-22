@@ -1,0 +1,81 @@
+{
+  "name": "generator-jhipster-react-native",
+  "version": "4.1.3",
+  "description": "React Native Blueprint for existing JHipster Apps",
+  "keywords": [
+    "yeoman-generator",
+    "jhipster-blueprint",
+    "jhipster-6",
+    "jhipster-7",
+    "react-native",
+    "expo"
+  ],
+  "homepage": "https://github.com/ruddell/generator-jhipster-react-native",
+  "bugs": {
+    "url": "https://github.com/ruddell/generator-jhipster-react-native/issues"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Jon Ruddell",
+    "email": "jonathan.ruddell@gmail.com",
+    "url": "https://jruddell.com/"
+  },
+  "main": "generators/app/index.js",
+  "bin": {
+    "rnhipster": "./cli/rnhipster.js"
+  },
+  "files": [
+    "generators",
+    "lib",
+    "cli"
+  ],
+  "scripts": {
+    "jsdoc": "jsdoc --configure jsdoc-conf.json",
+    "lint": "eslint .",
+    "lint-fix": "npm run lint -- --fix",
+    "prettier": "prettier --write \"{,.github/**/,generators/**/,lib/**/,cli/**/,test/**/}*.{js,json,md,yml}\"",
+    "release": "np",
+    "pretest": "npm run lint",
+    "test": "npm run test:unit -- test/*.spec.js",
+    "test:unit": "mocha --timeout 120000 --slow 0 --reporter spec",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "{,.github/**/,generators/**/,lib/**/,cli/**/,test/**/}*.{js,json,md,yml}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "chalk": "4.1.1",
+    "fs-extra": "10.0.0",
+    "generator-jhipster": "7.0.1",
+    "lodash": "4.17.21",
+    "pluralize": "8.0.0",
+    "semver": "7.3.5",
+    "shelljs": "0.8.4"
+  },
+  "devDependencies": {
+    "chai": "4.3.4",
+    "ejs-lint": "1.2.0",
+    "eslint": "7.28.0",
+    "eslint-config-airbnb-base": "14.2.1",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-import": "2.23.4",
+    "eslint-plugin-prettier": "3.4.0",
+    "husky": "6.0.0",
+    "jsdoc": "3.6.7",
+    "lint-staged": "11.0.0",
+    "mem-fs": "2.2.1",
+    "mocha": "9.0.0",
+    "np": "7.5.0",
+    "prettier": "2.3.1",
+    "sinon": "11.1.1",
+    "yeoman-assert": "3.1.1",
+    "yeoman-environment": "3.4.1",
+    "yeoman-test": "6.1.0"
+  },
+  "engines": {
+    "node": ">=14",
+    "npm": ">=6"
+  }
+}

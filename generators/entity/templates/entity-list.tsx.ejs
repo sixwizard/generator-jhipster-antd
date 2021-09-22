@@ -1,0 +1,86 @@
+import React, { useRef } from 'react';
+import { PageContainer } from '@ant-design/pro-layout';
+import { Button } from 'antd';
+import { useIntl, Link, history } from 'umi';
+import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+import { PlusOutlined } from '@ant-design/icons';
+import { list<%= context.entityNameCapitalized %>, delete<%= context.entityNameCapitalized %> } from '@/services/<%= context.entityFileName %>/api';
+import { transferParam } from '@/utils/utils';
+import { defaultColumns, relationColumns } from '@/pages/<%= context.entityFileName %>/column';
+
+// <%= context.entityNamePluralizedAndSpinalCased %> law-cases
+// <%= context.entityFileName %> law-case
+// <%= context.entityNamePlural %>  LawCases
+// <%= context.entityInstancePlural %> lawCases
+// <%= context.entityInstance %> lawCase
+// <%= context.entityNameCapitalized %> LawCase
+
+export default (): React.ReactNode => {
+  const intl = useIntl();
+  const actionRef = useRef<ActionType>();
+
+  const tableColumns: ProColumns<API.<%= context.entityNameCapitalized %>>[] = [
+    {
+      title: '操作',
+      dataIndex: 'option',
+      valueType: 'option',
+      fixed: 'right',
+      width: 120,
+      render: (_, record) => [
+        <Link to={`/<%= context.entityFileName %>/edit/${record.id}`}>查看</Link>,
+        <a
+          key="config"
+          onClick={() => {
+            delete<%= context.entityNameCapitalized %>(record.id);
+            actionRef?.current?.reload();
+          }}
+        >
+          删除
+        </a>,
+      ],
+    },
+  ];
+
+  const columns = defaultColumns.concat(relationColumns,tableColumns);
+
+  return (
+    <PageContainer>
+      <ProTable<API.<%= context.entityNameCapitalized %>, API.PageParams>
+        headerTitle={intl.formatMessage({
+          id: 'pages.searchTable.title',
+          defaultMessage: '查询表格',
+        })}
+        actionRef={actionRef}
+        rowKey="id"
+        search={{
+          labelWidth: 120,
+        }}
+        toolBarRender={() => [
+          <Button
+            type="primary"
+            key="primary"
+            onClick={() => {
+              history.push('/<%= context.entityFileName %>/add');
+            }}
+          >
+            <PlusOutlined /> 新建
+          </Button>,
+        ]}
+        request={async (params, sorter, filter) => {
+          // 表单搜索项会从 params 传入，传递给后端接口。
+          const res = await list<%= context.entityNameCapitalized %>(transferParam(params, sorter, columns));
+          return Promise.resolve({
+            data: res.data,
+            success: true,
+            // @ts-ignore
+            total: parseInt(res.response.headers.get('x-total-count'), 10),
+            current: params.current,
+            pageSize: params.pageSize,
+          });
+        }}
+        columns={columns}
+        scroll={{ x: 1300 }}
+      />
+    </PageContainer>
+  );
+};

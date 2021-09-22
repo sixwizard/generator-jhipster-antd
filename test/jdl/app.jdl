@@ -1,0 +1,8 @@
+application {
+	config {
+		authenticationType jwt
+		websocket false
+		skipClient true
+	}
+	entities *
+}

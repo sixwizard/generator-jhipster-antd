@@ -1,0 +1,101 @@
+import React from "react";
+import { Link } from "umi";
+import { ProColumns } from '@ant-design/pro-table';
+import TitleINTL from "@/components/TitleINTL";
+import DebounceSelect from "@/components/DebounceSelect";
+<%_ context.relationships.forEach((relation) => { _%>
+  <%_ if (relation.relationshipType.indexOf('to-one')>-1||relation.relationshipType.indexOf('many-to-many')>-1) { _%>
+import { <%= relation.otherEntityName %> } from "@/services/<%= relation.otherEntityNameSnakeCase %>/api";
+  <%_ } _%>
+<%_ }) _%>
+
+export const defaultColumns: ProColumns<API.<%= context.entityNameCapitalized %>>[] = [
+  {
+  title: 'ID',
+  dataIndex: 'id',
+  valueType: 'digit',
+  },
+  <%_ context.fields.filter(field => !field.id).forEach((field, index) => { _%>
+  <%_
+   if (field.fieldIsEnum) {
+  _%>
+      {
+        title: <TitleINTL id='<%- field.fieldTranslationKey %>' text='<%- field.fieldNameHumanized %>'/>,
+        dataIndex: '<%- field.fieldName %>',
+        valueEnum: {
+        <%_
+          const enumValues = field.fieldValues.split(',')
+          enumValues.forEach((enumValue, index) => {
+        _%>
+            '<%= enumValue %>': {
+              text: '<%= enumValue %>',
+              status: '<%= enumValue %>',
+            },
+        <%_ }) _%>
+        },
+      },
+    <%_ }else{%>
+      {
+        title: <TitleINTL id='<%- field.fieldTranslationKey %>' text='<%- field.fieldNameHumanized %>'/>,
+        dataIndex: '<%- field.fieldName %>',
+        valueType: '<%= context.getFieldColumnType(field.fieldType) %>',
+      },
+    <%_ }%>
+  <%_ }) _%>
+];
+
+
+  export const relationColumns: ProColumns<API.<%= context.entityNameCapitalized %>>[] = [
+<%_ context.relationships.forEach((relation) => { _%>
+  <%_ if (relation.relationshipType.indexOf('to-one')>-1) { _%>
+    <%_ const otherName = relation.otherEntityField?relation.otherEntityField:'id'; _%>
+  {
+    title: <TitleINTL id="<%= context.baseName %>.<%= context.entityInstance %>.<%= relation.relationshipName %>" text="<%= relation.relationshipName %>" />,
+    dataIndex: "<%= relation.relationshipName %>",
+    render: (dom, entity) => {
+      return (
+        <Link to={`/<%= relation.otherEntityNameSnakeCase %>/edit/${entity.<%= relation.relationshipName %>?.id}`}>
+          {entity.<%= relation.relationshipName %>?.<%= otherName %>}
+        </Link>
+      );
+    },
+  },
+  <%_ } _%>
+<%_ }) _%>
+];
+
+export const relationFormColumns: ProColumns<API.<%= context.entityNameCapitalized %>>[] = [
+<%_ context.relationships.forEach((relation) => { _%>
+  <%_ if (relation.relationshipType.indexOf('to-one')>-1||relation.relationshipType.indexOf('many-to-many')>-1) {
+      const dataIndexName = relation.relationshipType.indexOf('many-to-many')>-1? relation.relationshipNamePlural : relation.relationshipName
+  _%>
+   {
+    title: <TitleINTL id="<%= context.baseName %>.<%= context.entityInstance %>.<%= relation.relationshipName %>" text="<%= relation.relationshipName %>" />,
+    dataIndex: ['<%= dataIndexName %>','id'],
+    renderFormItem: (item,config,form) => {
+      const {dataIndex, initialValue} = item;
+      const fieldName = dataIndex as string;
+      const {getFieldValue} = form;
+      let fieldValue = getFieldValue(fieldName[0]);
+      if(fieldValue === undefined){
+        fieldValue = initialValue
+      }
+      return (
+        <DebounceSelect
+      <%_ if (relation.relationshipType.indexOf('many-to-many')>-1) { _%>
+          mode="multiple"
+      <%_ } _%>
+      <%_ const entityField = relation.otherEntityField || 'id'  _%>
+      <%_ if (relation.otherEntityField) { _%>
+          labelName={'<%= relation.otherEntityField %>'}
+      <%_ } _%>
+          fieldValue={fieldValue}
+          allowClear
+          fetchOptions={(name)=><%= relation.otherEntityName %>(name,'<%= entityField %>')}
+        />
+      );
+    },
+  },
+  <%_ } _%>
+<%_ }) _%>
+];
